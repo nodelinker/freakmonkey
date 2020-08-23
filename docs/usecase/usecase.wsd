@@ -1,0 +1,76 @@
+@startuml distribute_hids_use_case
+actor "it manager" as itm 
+actor "security manager" as secm
+secm <|-- itm 
+
+
+package dashboard{
+  usecase hids_policy as "策略管理" <<hids policy>>
+  usecase hids_policy_group as "策略分组" <<hids policy>>
+
+  usecase security_ruleset_mgr as "安全规则管理" <<security ruleset>>
+  usecase upload_ruleset as "规则包上传" <<update ruleset>>
+
+  usecase agent_group as "agent分组"
+
+  usecase user_login as "管理员登陆"
+  usecase user_rbac as "页面访问鉴权"
+
+  usecase big_data_log_analysis as "日志收集分析内容展示" <<data analysis>>
+  usecase file_integrity as "文件完整性校验" <<FIM>>
+  usecase file_integrity_alarm as "文件完整性破坏告警"
+
+  usecase agent_active_response as "终端响应管理"
+  usecase agent_active_response_policy as "预设事件响应策略" 
+  usecase agent_active_response_cmd as "终端执行命令" 
+  usecase agent_active_response_script as "终端执行脚本" 
+
+  usecase agent_vulnerability_mgr as "终端漏洞检测"
+
+  usecase software_assets as "软件资产管理" <<software assets>>
+  usecase software_assets_cis as "软件资产安全基线管理" <<cis>>
+  usecase software_assets_metrics as "软件资产性能指标监控" <<metrics>>
+    
+  usecase get_assets as "资产关联信息"    
+  usecase assets_define as "资产规则定义"
+
+  ' usecase software_cis_define as "软件资产安全基线规则定义"    
+
+  hids_policy <.. hids_policy_group: <<extends>>
+  hids_policy_group ..> agent_group: <<extends>>
+
+  software_assets <.. get_assets : <<include>>
+  software_assets <.. assets_define : <<include>>
+  software_assets <.. software_assets_metrics: <<include>>
+  ' software_assets_cis <.. software_cis_define : <<include>>
+  
+  software_assets_cis --|> software_assets
+  ' usecaseAlias <.. usecaseAlias : <<include>>
+  file_integrity <|-- file_integrity_alarm
+
+  security_ruleset_mgr <-- upload_ruleset
+
+  agent_active_response <.. agent_active_response_policy
+  agent_active_response <.. agent_active_response_cmd
+  agent_active_response <.. agent_active_response_script
+  
+  agent_vulnerability_mgr --|> hids_policy
+  agent_vulnerability_mgr --|> security_ruleset_mgr
+}
+
+usecase policy_push as "策略实时推送"
+
+
+hids_policy --> policy_push: <<策略变更>>
+secm --> hids_policy
+secm --> software_assets
+
+itm --> user_login
+secm --> user_login
+user_login --> user_rbac
+secm --> big_data_log_analysis
+secm --> file_integrity
+secm --> security_ruleset_mgr
+itm --> agent_active_response
+secm --> agent_vulnerability_mgr
+@enduml
