@@ -1,0 +1,207 @@
+@startuml architecture
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/release/1-0/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+
+skinparam defaultTextAlignment center
+
+' skinparam Component {
+' 	BorderColor #DarkSlateGrey
+' 	' BackgroundColor #PaleGreen 
+' 	BackgroundColor<<subsystem>> #LightYellow
+' 	BackgroundColor<<component>> #LightSalmon
+' }
+
+' skinparam Database {
+' 	BorderColor #DarkSlateGrey
+' 	' BackgroundColor #PaleGreen
+' 	BackgroundColor<<subsystem>> #LightYellow
+' 	BackgroundColor<<component>> #LightSalmon
+' }
+
+' skinparam Cloud {
+' 	BorderColor #DarkSlateGrey
+' 	' BackgroundColor #PaleGreen 
+' 	BackgroundColor<<subsystem>> #LightYellow
+' 	BackgroundColor<<component>> #LightSalmon
+' }
+
+skinparam Arrow {
+	Color #Gray
+	Thickness 2
+	Color<<other>> #Red;text:Red
+	Color<<interaction>> #Orange;text:Orange
+}
+
+skinparam rectangle<<system>> {
+    ' StereotypeFontColor ELEMENT_FONT_COLOR
+    FontColor ELEMENT_FONT_COLOR
+    BackgroundColor SYSTEM_BG_COLOR
+    BorderColor #3C7FC0
+}
+
+skinparam rectangle<<external_system>> {
+    StereotypeFontColor ELEMENT_FONT_COLOR
+}
+
+System_Boundary(sys_hids_agent, "Distribute HIDS Agent"){
+
+    Container_Boundary(cont_hids_policy, "hids规则管控"){
+        Container(cont_hids_ruleset, "ruleset reload", "规则动态加载")
+        Container(cont_hids_reload_modules, "modules reload", "模块动态加载")
+    }
+    
+    Container_Boundary(count_log_push_boundary, "日志推送"){
+        Container(cont_log_push, "日志推送模块", "https/private protocol/syslog")
+    }
+
+    Container_Boundary(count_hids_boundary, "HIDS 模块"){
+
+        Container(cont_log_data, "Log data collection", "日志收集"){
+            ' Component(c02_01, "Filebeat", "工具集成")
+            ' Component(c02_02, "log collector", "日志解析")
+            
+        }
+        Container(cont_file_integrity, "File integrity monitoring", "文件完整性校验")
+        Container(cont_agent_response, "Active response", "终端事件响应"){
+            ' Component(c04_01, "网络管控", "network manager")
+            ' Component(c04_02, "文件管控", "file manager")
+            ' Component(c04_03, "应用管控", "app manager")
+            ' Component(c04_04, "事件响应", "Incident Response")
+            
+        }
+
+
+        Container(cont_sys_collector, "System inventory", "系统清单"){
+        
+            ' Component(c00_01, "Hardware", "硬件信息")
+            ' Component(c00_02, "Operating System", "操作系统信息")
+            ' Component(c00_03, "Network interfaces", "网络信息")
+            ' Component(c00_04, "Packages", "安装包信息")
+            ' Component(c00_05, "Ports", "端口信息")
+            ' Component(c00_06, "Processes", "进程信息")
+            
+        }
+
+        Container(cont_security_policy_monitor, "Monitoring security policies", "安全策略监控"){
+            ' Component(c01_01, "Rootcheck", "基线检查")
+            ' Component(c01_02, "OpenSCAP", "工具集成")
+            ' Component(c01_03, "CIS-CAT", "工具集成")
+            ' Component(c01_04, "Security Configuration Assessment", "technology", "应用程序配置设置,以确保它们符合安全政策")
+            
+        }
+
+        Container(cont_vulnerbaility_detect, "Vulnerability detection", "漏洞检测"){
+
+        }
+        
+        Container(cont_command_monitor, "Command monitoring", "命令行监控")
+        Container(cont_malware_detector, "malware monitoring", "恶意程序&脚本落地监控"){
+            ' Component(c03_01, "malware detector", "恶意软件检测模块")
+            ' Component(c03_02, "OpenSCAP", "工具集成")
+            ' Component(c03_03, "CIS-CAT", "工具集成")
+        }
+
+    }
+
+}
+
+System_Boundary(sys_hids_log_collector, "Distribute HIDS log collector"){
+    Container(chids_manger_log_router, "日志接收分发", "technology"){
+        Component(c05_01, "日志类型分类规则", "golang", "通过ruleset decoder做规则分类，提取指定信息后，日志整形，日志聚合后发送给指定系统。")
+        Component(c05_02, "插件系统", "golang", "如果某些日志无法通过规则适配，必须通过抽象逻辑处理某一类日志则通过插件处理。")
+    }
+    
+}
+
+System_Boundary(sys_hids_policy_manager, "实时命令策略推送系统"){
+    Container(chids_manger_policy_mgr, "应用程序灰度", "technology")
+    Container(chids_manger_policy_mgr2, "安全规则灰度", "technology")
+    Container(chids_manger_policy_mgr3, "执行策略灰度", "technology")
+    
+}
+
+System_Boundary(sys_big_data_store, "大数据日志存储平台"){
+    
+}
+
+System_Boundary(sys_big_data_real_time_search, "大数据实时搜索聚合平台"){
+    
+}
+
+System_Boundary(sys_SIEM, "SIEM"){
+    
+}
+
+
+System_Boundary(sys_soar, "soar响应体系"){
+    
+}
+
+Person(person_admin, "管理员")
+
+
+System_Boundary(sys_dashboard, "业务系统 dashboard"){
+    Container_Boundary(cb_software_boundary, "Process相关"){
+        Container(cont_software_asset_mgr, "软件资产管理", "technology")
+        Container(cont_software_asset_cis_mgr, "软件资产安全基线检查", "technology" )
+    }
+
+    Container(sys_policy_mgr, "策略配置管理", "technology")
+    
+    ContainerDb(cont_database, "数据库", "mysql")
+
+}
+
+System_Boundary(sys_alert_system, "告警系统"){
+    Container_Boundary(cont_alert, "外部业务系统告警关联"){
+        Container(cont_sms_alert, "短信告警", "https")
+        Container(cont_webhook_alert, "webhook告警", "https")
+        Container(cont_callback_alert, "回调告警", "https")
+    }
+    
+}
+
+' Rel(cont_hids_policy, cont_log_data, "日志收集策略")
+' Rel(cont_hids_policy, cont_file_integrity, "文件完整性策略")
+' Rel(cont_hids_policy, cont_agent_response, "事件响应策略")
+' Rel(cont_hids_policy, cont_sys_collector, "系统信息收集策略")
+' Rel(cont_hids_policy, cont_security_policy_monitor, "安全监控策略")
+' Rel(cont_hids_policy, cont_vulnerbaility_detect, "安全监控策略")
+' Rel(cont_hids_policy, cont_malware_detector, "命令行监控策略")
+' Rel(cont_hids_policy, cont_command_monitor, "命令行监控策略")
+
+' Rel(cont_log_data, cont_log_push, "获取日志推送")
+' Rel(cont_file_integrity, cont_log_push, "完整性校验异常结果推送")
+' Rel(cont_agent_response, cont_log_push, "事件响应结果推送")
+' Rel(cont_sys_collector, cont_log_push, "系统信息收集结果推送")
+' Rel(cont_security_policy_monitor, cont_log_push, "安全策略监控结果推送")
+' Rel(cont_vulnerbaility_detect, cont_log_push, "漏洞检测结果推送")
+' Rel(cont_malware_detector, cont_log_push, "恶意软件检测结果推送")
+' Rel(cont_command_monitor, cont_log_push, "命令行检测结果监控")
+
+' [cont_hids_policy] ..> [count_hids_boundary]
+Rel_(cont_hids_policy, count_hids_boundary, "规则策略加载完毕重启子进程", "control path", "..[#cc44ff]->")
+Rel_(sys_hids_policy_manager, cont_hids_policy, "规则更新分布式下发", "control path", "..[#cc44ff]->")
+Rel_(sys_policy_mgr, sys_hids_policy_manager, "规则策略加载完毕重启子进程", "control path", "..[#cc44ff]->")
+Rel_(person_admin, sys_policy_mgr, "规则策略加载完毕重启子进程", "control path", "..[#cc44ff]->")
+Rel_(person_admin, cb_software_boundary, "软件资产可视化", "control path", "..[#cc44ff]->")
+
+Rel(count_hids_boundary, count_log_push_boundary, "日志集中管理推送")
+
+Rel(cont_log_push, chids_manger_log_router, "日志集中推送")
+Rel(chids_manger_log_router, sys_alert_system, "异常结果告警")
+Rel(chids_manger_log_router, cont_database, "业务平台监控日志分发")
+Rel(chids_manger_log_router, sys_big_data_store, "全量日志存储")
+Rel(chids_manger_log_router, sys_big_data_real_time_search, "实时查询平台")
+Rel(chids_manger_log_router, sys_SIEM, "第三方平台日志分发")
+
+
+Rel(sys_alert_system, sys_soar, "异常响应")
+Rel(cb_software_boundary, cont_database, "获取相关数据")
+
+
+
+@enduml
