@@ -22,32 +22,45 @@ System_Boundary(sys_agent_mgr, "实时命令推送集群系统"){
     
 
     Container_Boundary(node1, "node1"){
-        Component(etcd1, "etcd", "key-value store")
-        Component(tidb1, "tidb", "RDBMS")
+                
+        Container(distribute_store1, "分布式存储", "raft"){
+            Component(etcd1, "etcd", "key-value store")
+            Component(tidb1, "tidb", "RDBMS")
+        }
+
         Component(hids_mgr1, "hids manager", "golang", "websocket服务")
-        
         Rel(etcd1, hids_mgr1, "sub/pub")        
     }
 
     Container_Boundary(node2, "node2"){
-        Component(etcd2, "etcd", "key-value store")
-        Component(tidb2, "tidb", "RDBMS")
+        
+        Container(distribute_store2, "分布式存储", "raft"){
+            Component(etcd2, "etcd", "key-value store")
+            Component(tidb2, "tidb", "RDBMS")
+        }
+
+
+
         Component(hids_mgr2, "hids manager", "golang", "websocket服务")
         Rel(etcd2, hids_mgr2, "sub/pub")
 
     }
 
     Container_Boundary(node3, "node3"){
-        Component(etcd3, "etcd", "key-value store")
-        Component(tidb3, "tidb", "RDBMS")
+        Container(distribute_store3, "分布式存储", "raft"){
+            Component(etcd3, "etcd", "key-value store")
+            Component(tidb3, "tidb", "RDBMS")
+        }
         Component(hids_mgr3, "hids manager", "golang", "websocket服务")
 
         Rel(etcd3, hids_mgr3, "sub/pub")
     }
 
     Container_Boundary(nodeN, "node..n"){
-        Component(etcdN, "etcd", "key-value store")
-        Component(tidbN, "tidb", "RDBMS")
+        Container(distribute_storeN, "分布式存储", "raft"){
+            Component(etcdN, "etcd", "key-value store")
+            Component(tidbN, "tidb", "RDBMS")
+        }
         Component(hids_mgrN, "hids manager", "golang", "websocket服务")
         Rel(etcdN, hids_mgrN, "sub/pub")
 
