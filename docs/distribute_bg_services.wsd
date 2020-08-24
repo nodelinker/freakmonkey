@@ -1,0 +1,77 @@
+@startuml distribute_background_services
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/release/1-0/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+title 服务端命令&策略实时推送服务架构
+
+Person(it_manager, "it manager")
+Person(sec_manager, "security manager")
+
+System(sys1, "业务平台dashboard")
+
+System(sys_hids_agent, "hids终端"){
+    
+}
+
+System_Boundary(sys_agent_mgr, "实时命令推送集群系统"){
+
+    Container(load_balancer, "工作负载", "load balance")
+    
+
+    Container_Boundary(node1, "node1"){
+        Component(etcd1, "etcd", "key-value store")
+        Component(tidb1, "tidb", "RDBMS")
+        Component(hids_mgr1, "hids manager", "golang", "websocket服务")
+        
+        Rel(etcd1, hids_mgr1, "sub/pub")        
+    }
+
+    Container_Boundary(node2, "node2"){
+        Component(etcd2, "etcd", "key-value store")
+        Component(tidb2, "tidb", "RDBMS")
+        Component(hids_mgr2, "hids manager", "golang", "websocket服务")
+        Rel(etcd2, hids_mgr2, "sub/pub")
+
+    }
+
+    Container_Boundary(node3, "node3"){
+        Component(etcd3, "etcd", "key-value store")
+        Component(tidb3, "tidb", "RDBMS")
+        Component(hids_mgr3, "hids manager", "golang", "websocket服务")
+
+        Rel(etcd3, hids_mgr3, "sub/pub")
+    }
+
+    Container_Boundary(nodeN, "node..n"){
+        Component(etcdN, "etcd", "key-value store")
+        Component(tidbN, "tidb", "RDBMS")
+        Component(hids_mgrN, "hids manager", "golang", "websocket服务")
+        Rel(etcdN, hids_mgrN, "sub/pub")
+
+    }
+
+    Rel(load_balancer, hids_mgr1, "http", "websocket")
+    Rel(load_balancer, hids_mgr2, "http", "websocket")
+    Rel(load_balancer, hids_mgr3, "http", "websocket")
+    Rel(load_balancer, hids_mgrN, "http", "websocket")
+    
+
+    Rel(node1, node2, "数据同步", "raft")
+    Rel(node2, node3, "数据同步", "raft")
+    Rel(node3, nodeN, "数据同步", "raft")
+
+}
+
+Rel(it_manager, sys1, "http/https")
+Rel(sec_manager, sys1, "http/https")
+
+' sys1 --> sys_agent_mgr
+
+Rel(sys1, etcd1, "通知策略更新")
+Rel(sys_hids_agent, load_balancer, "https", "websocket")
+
+
+@enduml
