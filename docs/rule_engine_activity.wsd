@@ -1,0 +1,24 @@
+@startuml rule_engine_activity
+
+
+(*) --> "raw data"
+"raw data" --> "predecoding"
+
+if "predecoding" then
+--> [yes]"decoding"
+else
+--> (*)
+endif
+
+"decoding" --> "rule matching"
+
+if "rule matching" then
+-->[yes] "alert"
+--> (*)
+else
+--> (*)
+endif
+
+
+
+@enduml

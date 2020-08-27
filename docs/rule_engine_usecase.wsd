@@ -1,0 +1,58 @@
+@startuml rule_engine_usecase
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/release/1-0/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+System_Boundary(sys_hids_agent, "HIDS system"){
+
+
+    Container(cont_hids_agent1, "hids agent", "agent"){
+        Component(com_hids_ruleng1, "hids规则引擎", "ruleng", "rule matching engine")
+    }
+    Container(cont_hids_agent2, "hids agent", "agent"){
+        Component(com_hids_ruleng2, "hids规则引擎", "ruleng", "rule matching engine")
+    }
+    Container(cont_hids_agent3, "hids agent", "agent"){
+        Component(com_hids_ruleng3, "hids规则引擎", "ruleng", "rule matching engine")
+    }
+
+}
+
+System_Boundary(sys_hids_mgr, "HIDS manager"){
+
+    Container(cont_hids_mgr_sys_log, "Syslog", "sys", "系统服务")
+    
+
+    Container(cont_hids_mgr_data_recv, "hids 数据接收", "manager"){
+        Component(com_hids_mgr_ruleng, "hids规则引擎", "ruleng", "rule matching engine")
+    }
+
+    Container(cont_hids_log_dispatch, "日志分发", "dispatch")
+    
+}
+
+System_Boundary(sys_agentless_server, "None Agent System"){
+
+    Container(cont_agentless_server1, "无agent服务器", "agentless server")
+    Container(cont_agentless_server2, "无agent服务器", "agentless server")
+    Container(cont_agentless_server3, "无agent服务器", "agentless server")
+}
+
+Rel(cont_hids_mgr_sys_log, cont_hids_mgr_data_recv, "send log")
+
+Rel(cont_hids_agent1, cont_hids_log_dispatch, "清洗分发")
+Rel(cont_hids_agent2, cont_hids_log_dispatch, "清洗分发")
+Rel(cont_hids_agent3, cont_hids_log_dispatch, "清洗分发")
+
+Rel(cont_agentless_server1, cont_hids_mgr_sys_log, "send log")
+Rel(cont_agentless_server2, cont_hids_mgr_sys_log, "send log")
+Rel(cont_agentless_server3, cont_hids_mgr_sys_log, "send log")
+
+Rel(cont_hids_mgr_data_recv, cont_hids_log_dispatch, "清洗分发")
+
+
+
+
+@enduml
